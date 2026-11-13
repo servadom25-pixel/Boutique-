@@ -47,6 +47,8 @@ nav{background:rgba(6,10,20,.88);-webkit-backdrop-filter:blur(14px);backdrop-fil
 .dl{display:flex;flex-wrap:nowrap;gap:4px;margin-top:4px;overflow:hidden}.dl span,.dl s{font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:2px 6px;border-radius:6px;white-space:nowrap}.dl span{background:rgba(34,211,238,.16);color:#67e8f9;border:1px solid rgba(34,211,238,.35)}.dl s{color:var(--mu);opacity:.55;border:1px solid transparent}
 .dg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.dg .ch{padding:8px 2px;text-align:center;border-radius:12px;font-size:13px;line-height:1.25}
 </style></head><body><div id="app"><header><h1 id="ti"></h1></header><main id="m"></main><nav id="nav"></nav></div><div id="sh"></div><div id="to"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script>
 /* ===== À PERSONNALISER ===== */
 const SHOP={nom:'E-TECH',wa:'213791882700',dev:'DA',demo:false}; // wa : votre numéro WhatsApp avec indicatif, sans + ; demo:false pour masquer le mode démo
@@ -61,6 +63,10 @@ const addM=(s,n)=>{const d=new Date(s+'T12:00'),j=d.getDate();d.setMonth(d.getMo
 const diff=(a,b)=>Math.round((new Date(a+'T12:00')-new Date(b+'T12:00'))/864e5),fr=s=>new Date(s+'T12:00').toLocaleDateString('fr-FR');
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),uid=()=>Math.random().toString(36).slice(2,9);
 const money=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n||0)+' '+SHOP.dev;
+let db=null;
+try {
+  if (window.SUPABASE_CONFIG && window.supabase) db=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
+} catch(e) { console.error('Initialisation Supabase impossible',e); }
 let S={cust:{nom:'',cc:'213',tel:''},cart:[],orders:[],subs:[],n:1,pay:PAY[0][0]};try{S=Object.assign(S,JSON.parse(localStorage.getItem(K)||'null')||{})}catch(e){}
 const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
 let tab='shop',st='abo',proof='';
@@ -68,7 +74,7 @@ const TABS=[['shop','🛍️','Boutique'],['cart','🛒','Panier'],['subs','📺
 function sheet(h){const s=$('#sh');s.innerHTML=`<div class="sb" onclick="closeS()"></div><div class="sp2"><div class="gr"></div>${h}</div>`;requestAnimationFrame(()=>s.classList.add('open'))}
 const closeS=()=>$('#sh').classList.remove('open');let tt;const toast=m=>{const t=$('#to');t.innerHTML=`<div>${esc(m)}</div>`;clearTimeout(tt);tt=setTimeout(()=>t.innerHTML='',3000)};
 const tot=()=>S.cart.reduce((t,i)=>t+i.prix*(i.q||1),0);
-const PROD=[]; // vos produits (vide pour l'instant)
+let PROD=[]; // Produits actifs chargés depuis Supabase
 const av=a=>DU.filter(([k])=>+a.p[k]>0);
 const ico=a=>{if(a.img)return`<img class="ic" src="${esc(a.img)}" alt="">`;const w=a.n.trim().split(/\s+/),t=((w[0]||'?')[0]+((w[1]||w[0][1]||'')[0]||'')).toUpperCase();let h=0;for(const c of a.n)h=(h*31+c.charCodeAt(0))%360;return`<span class="ic" style="background:linear-gradient(135deg,hsl(${h},70%,52%),hsl(${(h+40)%360},70%,38%))">${esc(t)}</span>`};
 const plist=a=>DU.map(([k,l])=>+a.p[k]>0?`<span>${l}</span>`:`<s>${l}</s>`).join('');
@@ -80,7 +86,31 @@ const phn=c=>{const r=(c.tel||'').trim(),n=r.replace(/\D/g,'');return r.startsWi
 const label=i=>i.t=='sub'?`${i.app} · ${DU.find(d=>d[0]==i.duree)[1]}${i.renewOf?' (renouvellement)':' · '+i.device}`:`${i.nom} ×${i.q}`;
 function msg(o){return`Commande ${o.id}\nClient : ${o.cust.nom}\nTél : +${phn(o.cust)}\n${o.items.map(i=>'• '+label(i)+' : '+money(i.prix*(i.q||1))).join('\n')}\nTotal : ${money(o.total)}\nPaiement : ${o.pay}`}
 const wa=id=>{const o=S.orders.find(x=>x.id==id);window.open('https://wa.me/'+SHOP.wa+'?text='+encodeURIComponent(msg(o)),'_blank','noopener')};
-function order(){const c=S.cust;if(!c.nom.trim()||!c.tel.trim()){toast('Indiquez votre nom et numéro');return}if(!S.cart.length)return;const o={id:'CMD-'+String(S.n++).padStart(4,'0'),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};S.orders.unshift(o);S.cart=[];proof='';save();render();sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`)}
+async function order(){
+  const c=S.cust;
+  if(!c.nom.trim()||!c.tel.trim()){toast('Indiquez votre nom et numéro');return}
+  if(!S.cart.length)return;
+  if(!db){toast('Connexion à la boutique indisponible. Réessayez dans un instant.');return}
+  const o={id:'CMD-'+String(S.n++).padStart(4,'0'),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
+  const customerPhone='+'+phn(c);
+  try {
+    const {error:customerError}=await db.from('customers').insert({name:c.nom.trim(),phone:customerPhone});
+    if(customerError && customerError.code!=='23505') throw customerError;
+    const {error:orderError}=await db.from('orders').insert({
+      order_number:o.id,customer_name:c.nom.trim(),customer_phone:customerPhone,
+      items:o.items,total:o.total,currency:SHOP.dev,status:'pending',
+      payment_method:o.pay,payment_status:'unpaid'
+    });
+    if(orderError) throw orderError;
+  } catch(e) {
+    S.n--;
+    console.error('Enregistrement Supabase impossible',e);
+    toast('Commande non enregistrée : '+(e.message||'erreur de connexion'));
+    return;
+  }
+  S.orders.unshift(o);S.cart=[];proof='';save();render();
+  sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
+}
 function codeSheet(id){const o=S.orders.find(x=>x.id==id),L=o.items.map((it,k)=>[it,k]).filter(([it])=>it.t=='sub');sheet(`<h3>Code d’activation</h3><p class="mu">Saisissez le code que le vendeur vous a envoyé après votre paiement.</p>${L.map(([it,k])=>`<label>${esc(label(it))}</label><input id="cd${k}" placeholder="${it.renewOf?'Nouveau code (facultatif)':'Code reçu'}">`).join('')}<button class="btn" style="margin-top:12px" onclick="setCode('${id}')">Enregistrer</button>`)}
 function setCode(id){const o=S.orders.find(x=>x.id==id),v=k=>(($('#cd'+k)||{}).value||'').trim();if(o.items.some((i,k)=>i.t=='sub'&&!i.renewOf&&!v(k))){toast('Saisissez le code reçu');return}o.items.forEach((i,k)=>{if(i.t!='sub')return;const s=i.renewOf&&S.subs.find(x=>x.id==i.renewOf);if(s){s.exp=addM(diff(s.exp,td())>0?s.exp:td(),i.duree);if(v(k))s.code=v(k)}else S.subs.push({id:uid(),app:i.app,device:i.device,duree:i.duree,exp:addM(td(),i.duree),code:v(k)})});o.status='activée';save();closeS();render();toast('Abonnement enregistré')}
 const renew=id=>{const s=S.subs.find(x=>x.id==id),i=APPS.findIndex(a=>a.n==s.app);if(i<0){toast('Application introuvable');return}appSheet(i,{d:s.duree,dev:s.device},id)};
@@ -93,5 +123,19 @@ return`<div class="cd">${S.cart.map((i,k)=>`<div class="row" style="margin-botto
 function vSubs(){return S.subs.length?S.subs.map(s=>{const n=diff(s.exp,td()),cl=n<0?'exp':n<=7?'':'ok';return`<div class="cd"><div class="row"><b>${esc(s.app)}</b><span class="b ${cl}">${n<0?'expiré':n<=7?'J-'+n:n+' j'}</span></div><div class="mu">${esc(s.device)} · expire le ${fr(s.exp)}</div><div class="pb"><i style="width:${n<0?0:Math.min(100,n/(s.duree*30)*100)}%"></i></div><div class="row" style="margin-top:10px"><button class="btn s sm" onclick="cp('${s.code}')">Code : ${esc(s.code)} ⧉</button><button class="btn sm" onclick="renew('${s.id}')">Renouveler</button></div></div>`}).join(''):`<div class="cd mu">Aucun abonnement pour le moment. Une fois votre code reçu par WhatsApp, saisissez-le dans l’onglet Commandes : l’abonnement apparaît ici avec sa date d’expiration.</div>`}
 function vOrd(){return S.orders.length?S.orders.map(o=>`<div class="cd"><div class="row"><b>${o.id}</b><span class="b ${o.status=='activée'?'ok':''}">${o.status=='activée'?'Activée':'En attente'}</span></div><div class="mu">${fr(o.date)} · ${esc(o.pay)}</div>${o.items.map(i=>`<div style="margin-top:4px">• ${esc(label(i))}</div>`).join('')}<div class="row" style="margin-top:10px"><b>${money(o.total)}</b><button class="btn g sm" onclick="wa('${o.id}')">WhatsApp</button></div>${o.status!='activée'&&o.items.some(i=>i.t=='sub')?`<button class="btn s" style="margin-top:8px" onclick="codeSheet('${o.id}')">J’ai reçu mon code d’activation</button>`:''}</div>`).join(''):`<div class="cd mu">Aucune commande.</div>`}
 function render(){$('#ti').textContent=({shop:SHOP.nom,cart:'Mon panier',subs:'Mes abonnements',ord:'Mes commandes'})[tab];$('#nav').innerHTML=TABS.map(([k,i,l])=>`<a class="${k==tab?'on':''}" onclick="go('${k}')"><span>${i}</span>${l}${k=='cart'&&S.cart.length?`<i>${S.cart.length}</i>`:''}</a>`).join('');$('#m').innerHTML=({shop:vShop,cart:vCart,subs:vSubs,ord:vOrd})[tab]()}
-render();try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+render();
+async function initRemote(){
+  if(!db){toast('Connexion Supabase non configurée');return}
+  try {
+    const {data,error}=await db.from('products').select('id,name,description,price,currency').eq('active',true).order('created_at',{ascending:true});
+    if(error) throw error;
+    PROD.splice(0,PROD.length,...(data||[]).map(p=>({id:p.id,n:p.name,d:p.description||'',p:Number(p.price)||0,e:'📦',currency:p.currency||SHOP.dev})));
+    render();
+  } catch(e) {
+    console.error('Chargement des produits impossible',e);
+    toast('Impossible de charger les produits : '+(e.message||'erreur'));
+  }
+}
+initRemote();
+try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
 </script></body></html>
