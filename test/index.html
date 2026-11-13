@@ -53,7 +53,7 @@ nav{background:rgba(6,10,20,.88);-webkit-backdrop-filter:blur(14px);backdrop-fil
 /* ===== À PERSONNALISER ===== */
 const SHOP={nom:'E-TECH',wa:'213791882700',dev:'DA',demo:false}; // wa : votre numéro WhatsApp avec indicatif, sans + ; demo:false pour masquer le mode démo
 const DU=[[1,'1 mois'],[3,'3 mois'],[6,'6 mois'],[12,'12 mois']];
-const APPS=[{n:'Iron pro max',e:'📺',p:{12:4000}},{n:'Lynx',e:'🎬',p:{1:600,3:900,6:1500,12:2500}},{n:'Mi star',e:'📡',p:{1:600,3:800,6:1500,12:2000}},{n:'Fosto',e:'🛰️',p:{12:3000}},{n:'Atlas pro',e:'🛰️',p:{12:4000}},{n:'King 360',e:'🛰️',p:{12:8500}},{n:'Vanilla',e:'🛰️',p:{12:1500}},{n:'Funcam',e:'🛰️',p:{12:2000}},{n:'Forever',e:'🛰️',p:{12:4000}},{n:'Hi share premium',e:'🛰️',p:{12:3500}}];
+let APPS=[{n:'Iron pro max',e:'📺',p:{12:4000}},{n:'Lynx',e:'🎬',p:{1:600,3:900,6:1500,12:2500}},{n:'Mi star',e:'📡',p:{1:600,3:800,6:1500,12:2000}},{n:'Fosto',e:'🛰️',p:{12:3000}},{n:'Atlas pro',e:'🛰️',p:{12:4000}},{n:'King 360',e:'🛰️',p:{12:8500}},{n:'Vanilla',e:'🛰️',p:{12:1500}},{n:'Funcam',e:'🛰️',p:{12:2000}},{n:'Forever',e:'🛰️',p:{12:4000}},{n:'Hi share premium',e:'🛰️',p:{12:3500}}];
 const DEV=['Récepteur numérique','Box TV','Smart TV','Smartphone'];
 const PAY=[['BaridiMob','Envoyez le montant par BaridiMob au compte : XXXX XXXX. Puis joignez la preuve de paiement.'],['CCP','Versement CCP au n° XXXXXXXX clé XX. Puis joignez la preuve.'],['Virement bancaire','IBAN : XXXX XXXX XXXX. Puis joignez la preuve.'],['Main propre','Vous payez à la remise ou à l’activation.']];
 const CC=[['213','Algérie (+213)'],['33','France (+33)'],['1','Canada (+1)'],['44','Angleterre (+44)'],['34','Espagne (+34)'],['32','Belgique (+32)'],['49','Allemagne (+49)']];
@@ -137,13 +137,19 @@ render();
 async function initRemote(){
   if(!db){toast('Connexion Supabase non configurée');return}
   try {
-    const {data,error}=await db.from('products').select('id,name,description,price,currency').eq('active',true).order('created_at',{ascending:true});
-    if(error) throw error;
-    PROD.splice(0,PROD.length,...(data||[]).map(p=>({id:p.id,n:p.name,d:p.description||'',p:Number(p.price)||0,e:'📦',currency:p.currency||SHOP.dev})));
+    const [pr,ar]=await Promise.all([
+      db.from('products').select('id,name,description,price,currency').eq('active',true).order('created_at',{ascending:true}),
+      db.from('apps').select('id,name,emoji,prices').eq('active',true).order('created_at',{ascending:true})
+    ]);
+    if(pr.error)throw pr.error;
+    PROD.splice(0,PROD.length,...(pr.data||[]).map(p=>({id:p.id,n:p.name,d:p.description||'',p:Number(p.price)||0,e:'📦',currency:p.currency||SHOP.dev})));
+    if(!ar.error && Array.isArray(ar.data) && ar.data.length){
+      APPS.splice(0,APPS.length,...ar.data.map(a=>({id:a.id,n:a.name,e:a.emoji||'📺',p:a.prices||{}})));
+    } else if(ar.error && ar.error.code!=='42P01') console.warn('Applications non chargées',ar.error);
     render();
   } catch(e) {
-    console.error('Chargement des produits impossible',e);
-    toast('Impossible de charger les produits : '+(e.message||'erreur'));
+    console.error('Chargement catalogue impossible',e);
+    toast('Impossible de charger le catalogue : '+(e.message||'erreur'));
   }
 }
 initRemote();
