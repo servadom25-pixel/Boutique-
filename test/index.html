@@ -86,14 +86,21 @@ const phn=c=>{const r=(c.tel||'').trim(),n=r.replace(/\D/g,'');return r.startsWi
 const label=i=>i.t=='sub'?`${i.app} · ${DU.find(d=>d[0]==i.duree)[1]}${i.renewOf?' (renouvellement)':' · '+i.device}`:`${i.nom} ×${i.q}`;
 function msg(o){return`Commande ${o.id}\nClient : ${o.cust.nom}\nTél : +${phn(o.cust)}\n${o.items.map(i=>'• '+label(i)+' : '+money(i.prix*(i.q||1))).join('\n')}\nTotal : ${money(o.total)}\nPaiement : ${o.pay}`}
 const wa=id=>{const o=S.orders.find(x=>x.id==id);window.open('https://wa.me/'+SHOP.wa+'?text='+encodeURIComponent(msg(o)),'_blank','noopener')};
+let orderBusy=false;
 async function order(){
+  if(orderBusy)return;
   const c=S.cust;
   if(!c.nom.trim()||!c.tel.trim()){toast('Indiquez votre nom et numéro');return}
-  if(!S.cart.length)return;
-  if(!db){toast('Connexion à la boutique indisponible. Réessayez dans un instant.');return}
-  const o={id:'CMD-'+Date.now().toString(36).toUpperCase()+'-'+uid().toUpperCase(),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
-  const customerPhone='+'+phn(c);
+  if(!S.cart.length){toast('Votre panier est vide');return}
+  if(!db){toast('Connexion Supabase indisponible. Rechargez la page.');return}
+  orderBusy=true;
+  const btn=document.activeElement;
+  const oldText=btn&&btn.tagName==='BUTTON'?btn.textContent:'';
+  if(btn&&btn.tagName==='BUTTON'){btn.disabled=true;btn.textContent='Enregistrement…'}
+  toast('Enregistrement de votre commande…');
   try {
+    const o={id:'CMD-'+Date.now().toString(36).toUpperCase()+'-'+uid().toUpperCase(),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
+    const customerPhone='+'+phn(c);
     const {error:customerError}=await db.from('customers').insert({name:c.nom.trim(),phone:customerPhone});
     if(customerError && customerError.code!=='23505') throw customerError;
     const {error:orderError}=await db.from('orders').insert({
@@ -102,13 +109,15 @@ async function order(){
       payment_method:o.pay,payment_status:'unpaid'
     });
     if(orderError) throw orderError;
+    S.orders.unshift(o);S.cart=[];proof='';save();render();
+    sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
   } catch(e) {
-    console.error('Enregistrement Supabase impossible',e);
-    toast('Commande non enregistrée : '+(e.message||'erreur de connexion'));
-    return;
+    console.error('Erreur commande E-TECH:',e);
+    toast('Erreur : '+(e.message||e.details||'enregistrement impossible'));
+  } finally {
+    orderBusy=false;
+    if(btn&&btn.isConnected&&btn.tagName==='BUTTON'){btn.disabled=false;btn.textContent=oldText}
   }
-  S.orders.unshift(o);S.cart=[];proof='';save();render();
-  sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
 }
 function codeSheet(id){const o=S.orders.find(x=>x.id==id),L=o.items.map((it,k)=>[it,k]).filter(([it])=>it.t=='sub');sheet(`<h3>Code d’activation</h3><p class="mu">Saisissez le code que le vendeur vous a envoyé après votre paiement.</p>${L.map(([it,k])=>`<label>${esc(label(it))}</label><input id="cd${k}" placeholder="${it.renewOf?'Nouveau code (facultatif)':'Code reçu'}">`).join('')}<button class="btn" style="margin-top:12px" onclick="setCode('${id}')">Enregistrer</button>`)}
 function setCode(id){const o=S.orders.find(x=>x.id==id),v=k=>(($('#cd'+k)||{}).value||'').trim();if(o.items.some((i,k)=>i.t=='sub'&&!i.renewOf&&!v(k))){toast('Saisissez le code reçu');return}o.items.forEach((i,k)=>{if(i.t!='sub')return;const s=i.renewOf&&S.subs.find(x=>x.id==i.renewOf);if(s){s.exp=addM(diff(s.exp,td())>0?s.exp:td(),i.duree);if(v(k))s.code=v(k)}else S.subs.push({id:uid(),app:i.app,device:i.device,duree:i.duree,exp:addM(td(),i.duree),code:v(k)})});o.status='activée';save();closeS();render();toast('Abonnement enregistré')}
