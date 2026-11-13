@@ -1,0 +1,140 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#060a14">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png">
+<title>Boutique IPTV</title>
+<style>
+:root{--bg:#f2f4f8;--cd:#fff;--tx:#1b2430;--mu:#6b7686;--bd:#e5e8ee;--pr:#5b4cf0;--ac:#f97316;--ok:#16a34a;--ko:#dc2626;--ho:#eceefb}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--cd:#181d25;--tx:#e9edf3;--mu:#8e9aad;--bd:#262d38;--pr:#8b7dff;--ac:#ff9a4d;--ok:#4cc38a;--ko:#ff7a70;--ho:#222742}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{max-width:520px;margin:auto;min-height:100vh;min-height:100dvh}
+header{position:sticky;top:0;z-index:5;padding:calc(12px + env(safe-area-inset-top,0px)) 16px 10px;background:var(--bg)}h1{font-size:22px;margin:0}h3{margin:0 0 10px;font-size:16px}
+main{padding:0 14px calc(96px + env(safe-area-inset-bottom,0px))}.mu{color:var(--mu);font-size:13px}
+.demo{background:#fff7ed;color:#9a3412;border-radius:12px;padding:8px 12px;font-size:13px;margin-bottom:12px}
+.cd{background:var(--cd);border-radius:16px;padding:14px;margin-bottom:12px}
+.it{display:flex;align-items:center;gap:12px;background:var(--cd);border-radius:14px;padding:12px;margin-bottom:8px;cursor:pointer}.it:active{transform:scale(.985)}
+.em{flex:none;width:46px;height:46px;border-radius:14px;background:var(--ho);display:grid;place-items:center;font-size:24px}.fl{flex:1;min-width:0}.fl b{display:block}
+.gp{display:grid;grid-template-columns:1fr 1fr;gap:10px}.pc{background:var(--cd);border-radius:16px;padding:12px;text-align:center}.pc .em{margin:0 auto 8px;width:64px;height:64px;font-size:34px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}.ch{border:1px solid var(--bd);background:var(--cd);color:var(--tx);border-radius:20px;padding:8px 14px;font:inherit;font-size:14px;cursor:pointer}.ch.on{background:var(--pr);color:#fff;border-color:var(--pr)}.ch.off{text-decoration:line-through;opacity:.45;cursor:not-allowed}.ic{width:100%;height:100%;border-radius:14px;display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px;object-fit:cover}.em img.ic{display:block}
+.btn{font:inherit;background:var(--pr);color:#fff;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;text-align:center;text-decoration:none;display:inline-block;width:100%}.btn.s{background:var(--ho);color:var(--pr)}.btn.g{background:#16a34a}.btn.sm{width:auto;padding:6px 12px;font-size:13px}
+input,select{font:inherit;font-size:16px;width:100%;padding:11px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx)}label{font-size:12px;color:var(--mu);display:block;margin:10px 0 4px}
+.sg{display:flex;background:var(--cd);border-radius:12px;padding:3px;margin-bottom:12px}.sg a{flex:1;text-align:center;padding:8px;border-radius:10px;cursor:pointer;color:var(--mu)}.sg a.on{background:var(--pr);color:#fff}
+nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:auto;background:var(--cd);border-top:1px solid var(--bd);display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:10}
+nav a{flex:1;text-align:center;font-size:11px;color:var(--mu);padding:4px 0;cursor:pointer;position:relative}nav a span{display:block;font-size:21px}nav a.on{color:var(--pr);font-weight:700}nav i{position:absolute;top:0;left:55%;background:var(--ko);color:#fff;font-style:normal;font-size:10px;border-radius:9px;padding:0 5px}
+.b{font-size:12px;font-weight:700;border-radius:8px;padding:2px 8px;background:#ffedd5;color:#c2410c}.b.ok{background:#dcfce7;color:#15803d}.b.exp{background:#fee2e2;color:#b42318}
+.pb{height:6px;background:var(--bd);border-radius:4px;overflow:hidden;margin-top:6px}.pb i{display:block;height:100%;background:var(--ok)}
+#sh{position:fixed;inset:0;z-index:30;pointer-events:none}#sh.open{pointer-events:auto}.sb{position:absolute;inset:0;background:#0007;opacity:0;transition:opacity .2s}.open .sb{opacity:1}
+.sp2{position:absolute;left:0;right:0;bottom:0;max-width:520px;margin:auto;background:var(--cd);border-radius:22px 22px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:90vh;max-height:90dvh;overflow:auto;overscroll-behavior:contain;transform:translateY(100%);transition:transform .25s}.open .sp2{transform:none}.gr{width:44px;height:5px;border-radius:3px;background:var(--bd);margin:0 auto 14px}
+#to{position:fixed;left:0;right:0;bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;z-index:40;pointer-events:none}#to div{background:#222;color:#fff;border-radius:12px;padding:10px 16px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.q{display:flex;align-items:center;gap:8px}.q button{width:30px;height:30px;border-radius:50%;border:1px solid var(--bd);background:var(--cd);color:var(--tx);font-size:16px}
+</style><style>
+/* Thème tech sombre */
+:root{--bg:#060a14;--cd:rgba(16,24,44,.72);--tx:#e6f1ff;--mu:#8aa0c0;--bd:rgba(80,140,255,.22);--pr:#22d3ee;--ac:#a78bfa;--ho:rgba(34,211,238,.12);--ok:#34d399;--ko:#fb7185;color-scheme:dark}
+body{background:#060a14;background-image:radial-gradient(900px 520px at 90% -10%,rgba(139,92,246,.30),transparent 60%),radial-gradient(700px 480px at -10% 25%,rgba(34,211,238,.18),transparent 60%),linear-gradient(rgba(80,140,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(80,140,255,.07) 1px,transparent 1px);background-size:auto,auto,30px 30px,30px 30px;background-attachment:fixed}
+#app{background:transparent}
+header{background:rgba(6,10,20,.75);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd)}
+h1{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:1px;background:linear-gradient(90deg,#22d3ee,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cd,.it,.pc{border:1px solid var(--bd);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.it{padding:10px 12px}.it:active{border-color:var(--pr);box-shadow:0 0 14px rgba(34,211,238,.35)}
+.em{background:rgba(34,211,238,.1);border:1px solid var(--bd);box-shadow:0 0 12px rgba(34,211,238,.15)}
+.btn{background:linear-gradient(135deg,#06b6d4,#7c3aed);color:#fff;box-shadow:0 0 16px rgba(34,211,238,.3)}.btn.s{background:var(--ho);color:var(--pr);box-shadow:none;border:1px solid var(--bd)}
+.ch{background:rgba(16,24,44,.8)}.ch.on{background:linear-gradient(135deg,#06b6d4,#7c3aed);border-color:transparent;color:#fff;box-shadow:0 0 12px rgba(34,211,238,.4)}
+nav{background:rgba(6,10,20,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--bd)}nav a.on{color:var(--pr);text-shadow:0 0 10px rgba(34,211,238,.6)}
+.sp2{background:#0b1222;border-top:1px solid var(--bd)}input,select{background:rgba(6,10,20,.8);border-color:var(--bd);color:var(--tx)}
+.demo{background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.sg{background:rgba(16,24,44,.8);border:1px solid var(--bd)}.sg a.on{background:linear-gradient(135deg,#06b6d4,#7c3aed);color:#fff}
+.dl{display:flex;flex-wrap:nowrap;gap:4px;margin-top:4px;overflow:hidden}.dl span,.dl s{font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;padding:2px 6px;border-radius:6px;white-space:nowrap}.dl span{background:rgba(34,211,238,.16);color:#67e8f9;border:1px solid rgba(34,211,238,.35)}.dl s{color:var(--mu);opacity:.55;border:1px solid transparent}
+.dg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.dg .ch{padding:8px 2px;text-align:center;border-radius:12px;font-size:13px;line-height:1.25}
+</style></head><body><div id="app"><header><h1 id="ti"></h1></header><main id="m"></main><nav id="nav"></nav></div><div id="sh"></div><div id="to"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script>
+/* ===== À PERSONNALISER ===== */
+const SHOP={nom:'E-TECH',wa:'213791882700',dev:'DA',demo:false}; // wa : votre numéro WhatsApp avec indicatif, sans + ; demo:false pour masquer le mode démo
+const DU=[[1,'1 mois'],[3,'3 mois'],[6,'6 mois'],[12,'12 mois']];
+const APPS=[{n:'Iron pro max',e:'📺',p:{12:4000}},{n:'Lynx',e:'🎬',p:{1:600,3:900,6:1500,12:2500}},{n:'Mi star',e:'📡',p:{1:600,3:800,6:1500,12:2000}},{n:'Fosto',e:'🛰️',p:{12:3000}},{n:'Atlas pro',e:'🛰️',p:{12:4000}},{n:'King 360',e:'🛰️',p:{12:8500}},{n:'Vanilla',e:'🛰️',p:{12:1500}},{n:'Funcam',e:'🛰️',p:{12:2000}},{n:'Forever',e:'🛰️',p:{12:4000}},{n:'Hi share premium',e:'🛰️',p:{12:3500}}];
+const DEV=['Récepteur numérique','Box TV','Smart TV','Smartphone'];
+const PAY=[['BaridiMob','Envoyez le montant par BaridiMob au compte : XXXX XXXX. Puis joignez la preuve de paiement.'],['CCP','Versement CCP au n° XXXXXXXX clé XX. Puis joignez la preuve.'],['Virement bancaire','IBAN : XXXX XXXX XXXX. Puis joignez la preuve.'],['Main propre','Vous payez à la remise ou à l’activation.']];
+const CC=[['213','Algérie (+213)'],['33','France (+33)'],['1','Canada (+1)'],['44','Angleterre (+44)'],['34','Espagne (+34)'],['32','Belgique (+32)'],['49','Allemagne (+49)']];
+/* ===== FIN ===== */
+const $=s=>document.querySelector(s),K='boutique_iptv_v1',p2=n=>String(n).padStart(2,'0'),dstr=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),td=()=>dstr(new Date());
+const addM=(s,n)=>{const d=new Date(s+'T12:00'),j=d.getDate();d.setMonth(d.getMonth()+n);if(d.getDate()!=j)d.setDate(0);return dstr(d)};
+const diff=(a,b)=>Math.round((new Date(a+'T12:00')-new Date(b+'T12:00'))/864e5),fr=s=>new Date(s+'T12:00').toLocaleDateString('fr-FR');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),uid=()=>Math.random().toString(36).slice(2,9);
+const money=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n||0)+' '+SHOP.dev;
+let db=null;
+try {
+  if (window.SUPABASE_CONFIG && window.supabase) db=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
+} catch(e) { console.error('Initialisation Supabase impossible',e); }
+let S={cust:{nom:'',cc:'213',tel:''},cart:[],orders:[],subs:[],n:1,pay:PAY[0][0]};try{S=Object.assign(S,JSON.parse(localStorage.getItem(K)||'null')||{})}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+let tab='shop',st='abo',proof='';
+const TABS=[['shop','🛍️','Boutique'],['cart','🛒','Panier'],['subs','📺','Abonnements'],['ord','📦','Commandes']],go=t=>{tab=t;render();scrollTo(0,0)};
+function sheet(h){const s=$('#sh');s.innerHTML=`<div class="sb" onclick="closeS()"></div><div class="sp2"><div class="gr"></div>${h}</div>`;requestAnimationFrame(()=>s.classList.add('open'))}
+const closeS=()=>$('#sh').classList.remove('open');let tt;const toast=m=>{const t=$('#to');t.innerHTML=`<div>${esc(m)}</div>`;clearTimeout(tt);tt=setTimeout(()=>t.innerHTML='',3000)};
+const tot=()=>S.cart.reduce((t,i)=>t+i.prix*(i.q||1),0);
+let PROD=[]; // Produits actifs chargés depuis Supabase
+const av=a=>DU.filter(([k])=>+a.p[k]>0);
+const ico=a=>{if(a.img)return`<img class="ic" src="${esc(a.img)}" alt="">`;const w=a.n.trim().split(/\s+/),t=((w[0]||'?')[0]+((w[1]||w[0][1]||'')[0]||'')).toUpperCase();let h=0;for(const c of a.n)h=(h*31+c.charCodeAt(0))%360;return`<span class="ic" style="background:linear-gradient(135deg,hsl(${h},70%,52%),hsl(${(h+40)%360},70%,38%))">${esc(t)}</span>`};
+const plist=a=>DU.map(([k,l])=>+a.p[k]>0?`<span>${l}</span>`:`<s>${l}</s>`).join('');
+function appSheet(i,sel,renewOf){const a=APPS[i],A=av(a);sel=sel||{d:(A[0]||[12])[0],dev:DEV[0]};if(!(+a.p[sel.d]>0))sel.d=(A[0]||[12])[0];window._s=[i,sel,renewOf];sheet(`<h3 style="display:flex;align-items:center;gap:10px"><span class="em" style="width:38px;height:38px">${ico(a)}</span>${esc(a.n)}${renewOf?' — renouvellement':''}</h3><label>Durée</label><div class="chips dg">${DU.map(([k,l])=>+a.p[k]>0?`<button class="ch${sel.d==k?' on':''}" onclick="appSheet(${i},{d:${k},dev:'${sel.dev}'},${renewOf?`'${renewOf}'`:'null'})">${l}<br><small>${money(a.p[k])}</small></button>`:`<button class="ch off" disabled>${l}<br><small>indisponible</small></button>`).join('')}</div>${renewOf?'':`<label>Votre appareil</label><div class="chips">${DEV.map(d=>`<button class="ch${sel.dev==d?' on':''}" onclick="appSheet(${i},{d:${sel.d},dev:'${d}'},null)">${d}</button>`).join('')}</div>`}<button class="btn" onclick="addSub()">Ajouter au panier · ${money(a.p[sel.d])}</button>`)}
+function addSub(){const[i,sel,r]=window._s,a=APPS[i];if(!(+a.p[sel.d]>0)){toast('Durée indisponible');return}S.cart.push({t:'sub',app:a.n,duree:sel.d,device:sel.dev,prix:a.p[sel.d],renewOf:r||null});save();closeS();render();toast('Ajouté au panier')}
+function addProd(id){const p=PROD.find(x=>x.id==id),l=S.cart.find(i=>i.t=='prod'&&i.id==id);if(l)l.q++;else S.cart.push({t:'prod',id,nom:p.n,prix:p.p,q:1});save();render();toast('Ajouté au panier')}
+const qty=(k,d)=>{const i=S.cart[k];i.q=Math.max(0,(i.q||1)+d);if(!i.q)S.cart.splice(k,1);save();render()},rm=k=>{S.cart.splice(k,1);save();render()};
+const phn=c=>{const r=(c.tel||'').trim(),n=r.replace(/\D/g,'');return r.startsWith('+')?n:n.startsWith('00')?n.slice(2):c.cc+n.replace(/^0/,'')};
+const label=i=>i.t=='sub'?`${i.app} · ${DU.find(d=>d[0]==i.duree)[1]}${i.renewOf?' (renouvellement)':' · '+i.device}`:`${i.nom} ×${i.q}`;
+function msg(o){return`Commande ${o.id}\nClient : ${o.cust.nom}\nTél : +${phn(o.cust)}\n${o.items.map(i=>'• '+label(i)+' : '+money(i.prix*(i.q||1))).join('\n')}\nTotal : ${money(o.total)}\nPaiement : ${o.pay}`}
+const wa=id=>{const o=S.orders.find(x=>x.id==id);window.open('https://wa.me/'+SHOP.wa+'?text='+encodeURIComponent(msg(o)),'_blank','noopener')};
+async function order(){
+  const c=S.cust;
+  if(!c.nom.trim()||!c.tel.trim()){toast('Indiquez votre nom et numéro');return}
+  if(!S.cart.length)return;
+  if(!db){toast('Connexion à la boutique indisponible. Réessayez dans un instant.');return}
+  const o={id:'CMD-'+Date.now().toString(36).toUpperCase()+'-'+uid().toUpperCase(),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
+  const customerPhone='+'+phn(c);
+  try {
+    const {error:customerError}=await db.from('customers').insert({name:c.nom.trim(),phone:customerPhone});
+    if(customerError && customerError.code!=='23505') throw customerError;
+    const {error:orderError}=await db.from('orders').insert({
+      order_number:o.id,customer_name:c.nom.trim(),customer_phone:customerPhone,
+      items:o.items,total:o.total,currency:SHOP.dev,status:'pending',
+      payment_method:o.pay,payment_status:'unpaid'
+    });
+    if(orderError) throw orderError;
+  } catch(e) {
+    console.error('Enregistrement Supabase impossible',e);
+    toast('Commande non enregistrée : '+(e.message||'erreur de connexion'));
+    return;
+  }
+  S.orders.unshift(o);S.cart=[];proof='';save();render();
+  sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
+}
+function codeSheet(id){const o=S.orders.find(x=>x.id==id),L=o.items.map((it,k)=>[it,k]).filter(([it])=>it.t=='sub');sheet(`<h3>Code d’activation</h3><p class="mu">Saisissez le code que le vendeur vous a envoyé après votre paiement.</p>${L.map(([it,k])=>`<label>${esc(label(it))}</label><input id="cd${k}" placeholder="${it.renewOf?'Nouveau code (facultatif)':'Code reçu'}">`).join('')}<button class="btn" style="margin-top:12px" onclick="setCode('${id}')">Enregistrer</button>`)}
+function setCode(id){const o=S.orders.find(x=>x.id==id),v=k=>(($('#cd'+k)||{}).value||'').trim();if(o.items.some((i,k)=>i.t=='sub'&&!i.renewOf&&!v(k))){toast('Saisissez le code reçu');return}o.items.forEach((i,k)=>{if(i.t!='sub')return;const s=i.renewOf&&S.subs.find(x=>x.id==i.renewOf);if(s){s.exp=addM(diff(s.exp,td())>0?s.exp:td(),i.duree);if(v(k))s.code=v(k)}else S.subs.push({id:uid(),app:i.app,device:i.device,duree:i.duree,exp:addM(td(),i.duree),code:v(k)})});o.status='activée';save();closeS();render();toast('Abonnement enregistré')}
+const renew=id=>{const s=S.subs.find(x=>x.id==id),i=APPS.findIndex(a=>a.n==s.app);if(i<0){toast('Application introuvable');return}appSheet(i,{d:s.duree,dev:s.device},id)};
+const cp=t=>{try{navigator.clipboard.writeText(t).then(()=>toast('Code copié'),()=>toast('Copie impossible'))}catch(e){toast('Copie impossible')}};
+function vShop(){return`${SHOP.demo?'<div class="demo">Prototype : les commandes restent sur cet appareil. Le bouton WhatsApp envoie la vraie commande à votre numéro.</div>':''}<div class="sg"><a class="${st=='abo'?'on':''}" onclick="st='abo';render()">Abonnements</a><a class="${st=='prod'?'on':''}" onclick="st='prod';render()">Produits</a></div>${st=='abo'?APPS.map((a,i)=>`<div class="it" onclick="appSheet(${i})"><div class="em">${ico(a)}</div><div class="fl"><b>${esc(a.n)}</b><div class="dl">${plist(a)}</div></div><span class="mu">›</span></div>`).join(''):`<div class="gp">${!PROD.length?'<div class="cd mu" style="grid-column:1/-1">Aucun produit pour le moment.</div>':''}${PROD.map(p=>`<div class="pc"><div class="em">${p.e}</div><b>${esc(p.n)}</b><div class="mu">${esc(p.d)}</div><div style="margin:6px 0"><b>${money(p.p)}</b></div><button class="btn sm" onclick="addProd('${p.id}')">Ajouter</button></div>`).join('')}</div>`}`}
+function vCart(){if(!S.cart.length)return`<div class="cd mu">Votre panier est vide.</div><button class="btn" onclick="go('shop')">Voir la boutique</button>`;const c=S.cust,pi=PAY.find(p=>p[0]==S.pay);
+return`<div class="cd">${S.cart.map((i,k)=>`<div class="row" style="margin-bottom:10px"><div class="fl"><b>${esc(label(i))}</b><span class="mu">${money(i.prix*(i.q||1))}</span></div>${i.t=='prod'?`<div class="q"><button onclick="qty(${k},-1)">−</button><b>${i.q}</b><button onclick="qty(${k},1)">+</button></div>`:`<button class="ch" onclick="rm(${k})">✕</button>`}</div>`).join('')}<div class="row" style="border-top:1px solid var(--bd);padding-top:10px"><b>Total</b><b>${money(tot())}</b></div></div>
+<div class="cd"><h3>Vos coordonnées</h3><label>Nom</label><input value="${esc(c.nom)}" oninput="S.cust.nom=this.value;save()"><label>Pays du numéro</label><select onchange="S.cust.cc=this.value;save()">${CC.map(([k,l])=>`<option value="${k}"${k==c.cc?' selected':''}>${l}</option>`).join('')}</select><label>Numéro</label><input type="tel" value="${esc(c.tel)}" placeholder="0555 12 34 56" oninput="S.cust.tel=this.value;save()"></div>
+<div class="cd"><h3>Paiement</h3><div class="chips">${PAY.map(p=>`<button class="ch${S.pay==p[0]?' on':''}" onclick="S.pay='${p[0]}';save();render()">${p[0]}</button>`).join('')}</div><p class="mu">${esc(pi[1])}</p>${S.pay!='Main propre'?`<label>Preuve de paiement (photo)</label><input type="file" accept="image/*" onchange="proof=this.files[0]?this.files[0].name:''">`:''}</div><button class="btn" onclick="order()">Valider la commande · ${money(tot())}</button>`}
+function vSubs(){return S.subs.length?S.subs.map(s=>{const n=diff(s.exp,td()),cl=n<0?'exp':n<=7?'':'ok';return`<div class="cd"><div class="row"><b>${esc(s.app)}</b><span class="b ${cl}">${n<0?'expiré':n<=7?'J-'+n:n+' j'}</span></div><div class="mu">${esc(s.device)} · expire le ${fr(s.exp)}</div><div class="pb"><i style="width:${n<0?0:Math.min(100,n/(s.duree*30)*100)}%"></i></div><div class="row" style="margin-top:10px"><button class="btn s sm" onclick="cp('${s.code}')">Code : ${esc(s.code)} ⧉</button><button class="btn sm" onclick="renew('${s.id}')">Renouveler</button></div></div>`}).join(''):`<div class="cd mu">Aucun abonnement pour le moment. Une fois votre code reçu par WhatsApp, saisissez-le dans l’onglet Commandes : l’abonnement apparaît ici avec sa date d’expiration.</div>`}
+function vOrd(){return S.orders.length?S.orders.map(o=>`<div class="cd"><div class="row"><b>${o.id}</b><span class="b ${o.status=='activée'?'ok':''}">${o.status=='activée'?'Activée':'En attente'}</span></div><div class="mu">${fr(o.date)} · ${esc(o.pay)}</div>${o.items.map(i=>`<div style="margin-top:4px">• ${esc(label(i))}</div>`).join('')}<div class="row" style="margin-top:10px"><b>${money(o.total)}</b><button class="btn g sm" onclick="wa('${o.id}')">WhatsApp</button></div>${o.status!='activée'&&o.items.some(i=>i.t=='sub')?`<button class="btn s" style="margin-top:8px" onclick="codeSheet('${o.id}')">J’ai reçu mon code d’activation</button>`:''}</div>`).join(''):`<div class="cd mu">Aucune commande.</div>`}
+function render(){$('#ti').textContent=({shop:SHOP.nom,cart:'Mon panier',subs:'Mes abonnements',ord:'Mes commandes'})[tab];$('#nav').innerHTML=TABS.map(([k,i,l])=>`<a class="${k==tab?'on':''}" onclick="go('${k}')"><span>${i}</span>${l}${k=='cart'&&S.cart.length?`<i>${S.cart.length}</i>`:''}</a>`).join('');$('#m').innerHTML=({shop:vShop,cart:vCart,subs:vSubs,ord:vOrd})[tab]()}
+render();
+async function initRemote(){
+  if(!db){toast('Connexion Supabase non configurée');return}
+  try {
+    const {data,error}=await db.from('products').select('id,name,description,price,currency').eq('active',true).order('created_at',{ascending:true});
+    if(error) throw error;
+    PROD.splice(0,PROD.length,...(data||[]).map(p=>({id:p.id,n:p.name,d:p.description||'',p:Number(p.price)||0,e:'📦',currency:p.currency||SHOP.dev})));
+    render();
+  } catch(e) {
+    console.error('Chargement des produits impossible',e);
+    toast('Impossible de charger les produits : '+(e.message||'erreur'));
+  }
+}
+initRemote();
+try{if('serviceWorker' in navigator&&location.protocol.indexOf('http')==0)navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+</script></body></html>
