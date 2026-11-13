@@ -91,7 +91,7 @@ async function order(){
   if(!c.nom.trim()||!c.tel.trim()){toast('Indiquez votre nom et numéro');return}
   if(!S.cart.length)return;
   if(!db){toast('Connexion à la boutique indisponible. Réessayez dans un instant.');return}
-  const o={id:'CMD-'+String(S.n++).padStart(4,'0'),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
+  const o={id:'CMD-'+Date.now().toString(36).toUpperCase()+'-'+uid().toUpperCase(),date:td(),items:S.cart,total:tot(),pay:S.pay,proof,cust:{...c},status:'en attente'};
   const customerPhone='+'+phn(c);
   try {
     const {error:customerError}=await db.from('customers').insert({name:c.nom.trim(),phone:customerPhone});
@@ -103,7 +103,6 @@ async function order(){
     });
     if(orderError) throw orderError;
   } catch(e) {
-    S.n--;
     console.error('Enregistrement Supabase impossible',e);
     toast('Commande non enregistrée : '+(e.message||'erreur de connexion'));
     return;
