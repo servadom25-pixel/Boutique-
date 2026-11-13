@@ -18,9 +18,17 @@ const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=
 let db,orders=[],customers=[],products=[],subs=[],tab='orders';
 function msg(t,el=$('#loginMsg')){el.textContent=t;el.classList.remove('hidden')}
 function date(v){return v?new Date(v).toLocaleString('fr-FR'):'—'}
-async function init(){if(!window.SUPABASE_CONFIG||!SUPABASE_CONFIG.url.includes('supabase.co')||SUPABASE_CONFIG.anonKey.startsWith('VOTRE')){msg('Configuration manquante : créez supabase-config.js à partir de supabase-config.example.js, puis renseignez URL et clé publique Supabase.');return}
-db=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
-const {data:{session}}=await db.auth.getSession();if(session)await enter();db.auth.onAuthStateChange((_e,s)=>{if(s)enter();else showLogin()})}
+async function init(){
+  if(!window.supabase){msg('La bibliothèque Supabase ne s’est pas chargée. Actualisez la page ou vérifiez votre connexion.');return}
+  if(!window.SUPABASE_CONFIG||!SUPABASE_CONFIG.url||!SUPABASE_CONFIG.url.includes('supabase.co')||!SUPABASE_CONFIG.anonKey||SUPABASE_CONFIG.anonKey.startsWith('VOTRE')){
+    msg('Configuration Supabase manquante ou incorrecte. Vérifiez test/supabase-config.js.');return
+  }
+  db=window.supabase.createClient(SUPABASE_CONFIG.url,SUPABASE_CONFIG.anonKey);
+  const {data,error}=await db.auth.getSession();
+  if(error)throw error;
+  if(data.session)await enter();
+  db.auth.onAuthStateChange((_e,s)=>{if(s)enter().catch(e=>msg('Erreur ouverture administration : '+e.message));else showLogin()});
+}
 function showLogin(){$('#login').classList.remove('hidden');$('#app').classList.add('hidden');$('#logout').classList.add('hidden')}
 async function enter(){const {data:{user}}=await db.auth.getUser();if(!user)return showLogin();const {data:admin,error}=await db.from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle();if(error||!admin){await db.auth.signOut();msg('Ce compte ne possède pas les droits administrateur. Ajoutez son identifiant dans admin_users via SQL.');return}
 $('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#logout').classList.remove('hidden');await load();render()}
@@ -41,7 +49,18 @@ async function toggleProduct(id,active){const {error}=await db.from('products').
 async function updateSub(id,status){const {error}=await db.from('subscriptions').update({status}).eq('id',id);if(error)alert(error.message);else await loadAndRender()}
 async function addSub(){const {error}=await db.from('subscriptions').insert({customer_id:$('#sc').value||null,service_name:$('#sn').value,start_date:$('#ss').value||null,expiry_date:$('#se').value||null});if(error)alert(error.message);else await loadAndRender()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;render()}));
-$('#loginBtn').onclick=async()=>{const {error}=await db.auth.signInWithPassword({email:$('#email').value,password:$('#password').value});if(error)msg(error.message)};
+$('#loginBtn').addEventListener('click',async()=>{
+  const btn=$('#loginBtn'),email=$('#email').value.trim(),password=$('#password').value;
+  if(!db){msg('Connexion au serveur non initialisée. Rechargez la page.');return}
+  if(!email||!password){msg('Saisissez votre adresse e-mail et votre mot de passe.');return}
+  btn.disabled=true;btn.textContent='Connexion…';msg('Vérification de vos identifiants…');
+  try{
+    const {error}=await db.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    msg('Connexion réussie. Ouverture de votre espace administrateur…');
+  }catch(e){msg('Échec de connexion : '+(e.message||'Erreur inconnue'))}
+  finally{btn.disabled=false;btn.textContent='Se connecter'}
+});
 $('#logout').onclick=()=>db.auth.signOut();
-init().catch(e=>msg(e.message));
+init().catch(e=>msg('Initialisation impossible : '+(e.message||String(e))));
 </script></body></html>
