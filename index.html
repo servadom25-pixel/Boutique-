@@ -55,7 +55,7 @@ const SHOP={nom:'E-TECH',wa:'213791882700',dev:'DA',demo:false}; // wa : votre n
 const DU=[[1,'1 mois'],[3,'3 mois'],[6,'6 mois'],[12,'12 mois']];
 let APPS=[{n:'Iron pro max',e:'📺',p:{12:4000}},{n:'Lynx',e:'🎬',p:{1:600,3:900,6:1500,12:2500}},{n:'Mi star',e:'📡',p:{1:600,3:800,6:1500,12:2000}},{n:'Fosto',e:'🛰️',p:{12:3000}},{n:'Atlas pro',e:'🛰️',p:{12:4000}},{n:'King 360',e:'🛰️',p:{12:8500}},{n:'Vanilla',e:'🛰️',p:{12:1500}},{n:'Funcam',e:'🛰️',p:{12:2000}},{n:'Forever',e:'🛰️',p:{12:4000}},{n:'Hi share premium',e:'🛰️',p:{12:3500}}];
 const DEV=['Récepteur numérique','Box TV','Smart TV','Smartphone'];
-const PAY=[['BaridiMob','Envoyez le montant par BaridiMob au compte : XXXX XXXX. Puis joignez la preuve de paiement.'],['CCP','Versement CCP au n° XXXXXXXX clé XX. Puis joignez la preuve.'],['Virement bancaire','IBAN : XXXX XXXX XXXX. Puis joignez la preuve.'],['Main propre','Vous payez à la remise ou à l’activation.']];
+const PAY=[['Virement bancaire','Après validation de votre commande, contactez-nous sur WhatsApp. Nous vous communiquerons les coordonnées bancaires. Effectuez le virement puis envoyez-nous la preuve de paiement sur WhatsApp.']];
 const CC=[['213','Algérie (+213)'],['33','France (+33)'],['1','Canada (+1)'],['44','Angleterre (+44)'],['34','Espagne (+34)'],['32','Belgique (+32)'],['49','Allemagne (+49)']];
 /* ===== FIN ===== */
 const $=s=>document.querySelector(s),K='boutique_iptv_v1',p2=n=>String(n).padStart(2,'0'),dstr=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),td=()=>dstr(new Date());
@@ -84,7 +84,7 @@ function addProd(id){const p=PROD.find(x=>x.id==id),l=S.cart.find(i=>i.t=='prod'
 const qty=(k,d)=>{const i=S.cart[k];i.q=Math.max(0,(i.q||1)+d);if(!i.q)S.cart.splice(k,1);save();render()},rm=k=>{S.cart.splice(k,1);save();render()};
 const phn=c=>{const r=(c.tel||'').trim(),n=r.replace(/\D/g,'');return r.startsWith('+')?n:n.startsWith('00')?n.slice(2):c.cc+n.replace(/^0/,'')};
 const label=i=>i.t=='sub'?`${i.app} · ${DU.find(d=>d[0]==i.duree)[1]}${i.renewOf?' (renouvellement)':' · '+i.device}`:`${i.nom} ×${i.q}`;
-function msg(o){return`Commande ${o.id}\nClient : ${o.cust.nom}\nTél : +${phn(o.cust)}\n${o.items.map(i=>'• '+label(i)+' : '+money(i.prix*(i.q||1))).join('\n')}\nTotal : ${money(o.total)}\nPaiement : ${o.pay}`}
+function msg(o){return`Bonjour E-TECH, je viens de passer la commande ${o.id}.\nClient : ${o.cust.nom}\nTél : +${phn(o.cust)}\n${o.items.map(i=>'• '+label(i)+' : '+money(i.prix*(i.q||1))).join('\n')}\nTotal : ${money(o.total)}\nPaiement : virement bancaire.\nMerci de m'envoyer vos coordonnées bancaires. Je vous transmettrai la preuve du virement ici après paiement.`}
 const wa=id=>{const o=S.orders.find(x=>x.id==id);window.open('https://wa.me/'+SHOP.wa+'?text='+encodeURIComponent(msg(o)),'_blank','noopener')};
 let orderBusy=false;
 async function order(){
@@ -110,7 +110,7 @@ async function order(){
     });
     if(orderError) throw orderError;
     S.orders.unshift(o);S.cart=[];proof='';save();render();
-    sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Envoyez-la maintenant sur WhatsApp pour qu’elle soit traitée rapidement.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
+    sheet(`<h3>✅ Commande ${o.id} enregistrée</h3><p>Votre commande a été enregistrée. Contactez-nous sur WhatsApp pour recevoir les coordonnées bancaires. Après votre virement, envoyez votre preuve de paiement dans cette même conversation.</p><button class="btn g" onclick="wa('${o.id}')">Envoyer sur WhatsApp</button><button class="btn s" style="margin-top:8px" onclick="closeS();go('ord')">Voir mes commandes</button>`);
   } catch(e) {
     console.error('Erreur commande E-TECH:',e);
     toast('Erreur : '+(e.message||e.details||'enregistrement impossible'));
@@ -127,7 +127,7 @@ function vShop(){return`${SHOP.demo?'<div class="demo">Prototype : les commandes
 function vCart(){if(!S.cart.length)return`<div class="cd mu">Votre panier est vide.</div><button class="btn" onclick="go('shop')">Voir la boutique</button>`;const c=S.cust,pi=PAY.find(p=>p[0]==S.pay);
 return`<div class="cd">${S.cart.map((i,k)=>`<div class="row" style="margin-bottom:10px"><div class="fl"><b>${esc(label(i))}</b><span class="mu">${money(i.prix*(i.q||1))}</span></div>${i.t=='prod'?`<div class="q"><button onclick="qty(${k},-1)">−</button><b>${i.q}</b><button onclick="qty(${k},1)">+</button></div>`:`<button class="ch" onclick="rm(${k})">✕</button>`}</div>`).join('')}<div class="row" style="border-top:1px solid var(--bd);padding-top:10px"><b>Total</b><b>${money(tot())}</b></div></div>
 <div class="cd"><h3>Vos coordonnées</h3><label>Nom</label><input value="${esc(c.nom)}" oninput="S.cust.nom=this.value;save()"><label>Pays du numéro</label><select onchange="S.cust.cc=this.value;save()">${CC.map(([k,l])=>`<option value="${k}"${k==c.cc?' selected':''}>${l}</option>`).join('')}</select><label>Numéro</label><input type="tel" value="${esc(c.tel)}" placeholder="0555 12 34 56" oninput="S.cust.tel=this.value;save()"></div>
-<div class="cd"><h3>Paiement</h3><div class="chips">${PAY.map(p=>`<button class="ch${S.pay==p[0]?' on':''}" onclick="S.pay='${p[0]}';save();render()">${p[0]}</button>`).join('')}</div><p class="mu">${esc(pi[1])}</p>${S.pay!='Main propre'?`<label>Preuve de paiement (photo)</label><input type="file" accept="image/*" onchange="proof=this.files[0]?this.files[0].name:''">`:''}</div><button class="btn" onclick="order()">Valider la commande · ${money(tot())}</button>`}
+<div class="cd"><h3>Paiement</h3><div class="chips">${PAY.map(p=>`<button class="ch${S.pay==p[0]?' on':''}" onclick="S.pay='${p[0]}';save();render()">${p[0]}</button>`).join('')}</div><p class="mu">${esc(pi[1])}</p></div><button class="btn" onclick="order()">Valider la commande · ${money(tot())}</button>`}
 function vSubs(){return `<div class="cd mu">Vos abonnements apparaîtront ici après leur validation et leur activation par notre équipe.</div>`}
 function statusLabel(s){return ({pending:'En attente',confirmed:'Validée',processing:'En préparation',shipped:'Expédiée',completed:'Terminée',cancelled:'Annulée'})[s]||'En attente'}
 async function refreshOrderStatuses(){if(!db)return;const phone='+'+phn(S.cust);for(const o of S.orders){try{const {data,error}=await db.rpc('get_order_status',{p_order_number:o.id,p_phone:phone});if(!error&&data&&data.length){o.remoteStatus=data[0].status;o.remotePayment=data[0].payment_status}}catch(e){console.warn('Statut commande indisponible',e)}}save();if(tab==='ord')render()}
